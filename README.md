@@ -16,6 +16,6 @@ toAes128Gcm("Hello World!")
 deAes128Gcm("sNo77w35IXtOLreZ","fNaAvZ4cC6DTWIAXA81WiQ","acovia")
 
 /* result:
- Hellow World!
+ Hello World!
 */
 ```
