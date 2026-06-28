@@ -1,35 +1,52 @@
 import crypto from "node:crypto"
+import fs from "node:fs"
 
-export function toAes128Ccm(string) {
-    const iv = "AcoviaStudio"
-    const algorithm = "aes-128-ccm"
-    crypto.generateKey("aes", {length:128}, (err,key) => {
+export function encrypt(algorithm, ciphertext, keyLength, authTagLength) {
+    const iv = crypto.randomBytes(12);
+    crypto.generateKey("aes",{ length:keyLength },(err,key) => {
         if (err) throw err;
-        var result = crypto.createCipheriv(algorithm,key,iv,{authTagLength:16})
-        const context = result.update(string,"utf-8","base64").toString()
-        result.final()
-        const authTag = result.getAuthTag().toString("base64")
-        console.log("Info: " + context)
-        console.log("Key: " + key.export().toString("base64"))
-        console.log("Iv: " + iv)
-        console.log("AuthTag: " + authTag)
-        console.log("AuthTagLength: 16")
-        console.log("Algorithm: " + algorithm)
+        var cipher = crypto.createCipheriv(algorithm,key,iv,{authTagLength:authTagLength});
+        const result = cipher.update(ciphertext, "utf-8", "hex");
+        cipher.final();
+        const tag = cipher.getAuthTag();
+        console.log("Ciphertext: " + result);
+        outPut(algorithm, result, key, iv, tag, authTagLength)
     })
 }
 
-export function deAes128Ccm(info, key, iv, tag, length) {
-    const algorithm = "aes-128-ccm"
-    const deKey = Buffer.from(key, "base64")
-    const deTag = Buffer.from(tag, "base64")
-    const deAuthTagLength = {authTagLength:length}
-    var result = crypto.createDecipheriv(algorithm, deKey, iv, deAuthTagLength)
-    result.setAuthTag(deTag)
-    const context = result.update(info,"base64","utf-8")
-    try {
-        result.final("utf-8")
-    } catch(err) {
-        throw new Error('Authentication failed!');
-    }
-    console.log("Context: " + context)
+export function decrypt(algorithm, ciphertext, key, iv, tag, authTagLength) {
+    var deCiphertext = crypto.createDecipheriv(algorithm, Buffer.from(key,"hex"), Buffer.from(iv,"hex"), {authTagLength:authTagLength});
+    deCiphertext.setAuthTag(Buffer.from(tag,"hex"));
+    const context = deCiphertext.update(ciphertext, "hex", "utf-8");
+    deCiphertext.final();
+    console.log(context);
+    return context;
+}
+
+function outPut(algorithm, result, key, iv, tag, authTagLength) {
+    console.log("Algorithm: " + algorithm);
+    console.log("Key: " + key.export().toString("hex"));
+    console.log("Iv: " + iv.toString("hex"));
+    console.log("Tag: " + tag.toString("hex"));
+    console.log("AuthTagLength: " + authTagLength);
+}
+
+export function encryptFile(algorithm, file, keyLength, authTagLength) {
+    const context = fs.readFileSync(file).toString()
+    const iv = crypto.randomBytes(12);
+    crypto.generateKey("aes",{ length:keyLength },(err,key) => {
+        if (err) throw err;
+        var cipher = crypto.createCipheriv(algorithm,key,iv,{authTagLength:authTagLength});
+        const result = cipher.update(context, "utf-8", "hex");
+        cipher.final();
+        const tag = cipher.getAuthTag();
+        outPut(algorithm, result, key, iv, tag, authTagLength);
+        fs.writeFileSync("cipher.sec",result);
+    })
+}
+
+export function decipherFile(algorithm, file, key, iv, tag, authTagLength) {
+    const ciphertext = fs.readFileSync(file).toString()
+    const context = decrypt(algorithm, ciphertext, key, iv, tag, authTagLength);
+    fs.writeFileSync("output",context)
 }
