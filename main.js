@@ -1,17 +1,5 @@
-import {toAes128Gcm, deAes128Gcm} from "./aes128gcm.js"
+import * as cipgher from "./cipgher.js";
 
-toAes128Gcm("Hello World!")
+// cipgher.encryptFile("aes-128-ccm","tagore.txt",128,16)
 
-/* result:
- Code: base64
- Key: fNaAvZ4cC6DTWIAXA81WiQ==
- Iv: acovia
- Algorithm: aes-128-gcm
- Info: sNo77w35IXtOLreZ
-*/
-
-deAes128Gcm("sNo77w35IXtOLreZ","fNaAvZ4cC6DTWIAXA81WiQ","acovia")
-
-/* result:
- Hellow World!
-*/
+// cipgher.decipherFile('tagore.txt.enc','tagore.txt.key')
