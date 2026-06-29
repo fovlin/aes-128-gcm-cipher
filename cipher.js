@@ -55,9 +55,9 @@ export function encryptFile(algorithm, file, keyLength, authTagLength) {
     })
 }
 
-export function decipherFile(file, srcFile) {
+export function decipherFile(file, keyFile) {
     const ciphertext = fs.readFileSync(file),
-    secText = JSON.parse(fs.readFileSync(srcFile).toString()),
+    secText = JSON.parse(fs.readFileSync(keyFile).toString()),
     algorithm = secText["algorithm"],
     key = secText["key"],
     iv = secText["iv"],
