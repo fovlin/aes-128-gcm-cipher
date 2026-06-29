@@ -31,7 +31,7 @@ export function encryptFile(algorithm, file, keyLength, authTagLength) {
     crypto.generateKey("aes",{ length:keyLength },(err,key) => {
         if (err) throw err;
         var cipher = crypto.createCipheriv(algorithm,key,iv,{authTagLength:authTagLength});
-        const cipherData = cipher.update(fileData) + cipher.final(),
+        const cipherData = Buffer.concat([cipher.update(fileData), cipher.final()]);
         tag = cipher.getAuthTag();
         fs.writeFileSync(file + ".enc",cipherData);
         console.log("Algorithm: " + algorithm);
@@ -64,8 +64,7 @@ export function decryptFile(file, keyFile) {
     authTagLength = secText["authTagLength"]
     var deCiphertext = crypto.createDecipheriv(algorithm, Buffer.from(key,"hex"), Buffer.from(iv,"hex"), {authTagLength:authTagLength});
     deCiphertext.setAuthTag(Buffer.from(tag,"hex"));
-    const context = deCiphertext.update(ciphertext);
-    deCiphertext.final();
+    const context = Buffer.concat([deCiphertext.update(ciphertext), deCiphertext.final()]);
     console.log(context);
     fs.writeFileSync(file.replace(".enc",""),context)
 }
