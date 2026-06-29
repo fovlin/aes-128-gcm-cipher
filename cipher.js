@@ -61,7 +61,7 @@ export function decryptFile(file, keyFile) {
     key = secText["key"],
     iv = secText["iv"],
     tag = secText["tag"],
-    authTagLength = secText["authTagLength"]
+    authTagLength = secText["authTagLength"];
     var deCiphertext = crypto.createDecipheriv(algorithm, Buffer.from(key,"hex"), Buffer.from(iv,"hex"), {authTagLength:authTagLength});
     deCiphertext.setAuthTag(Buffer.from(tag,"hex"));
     const context = Buffer.concat([deCiphertext.update(ciphertext), deCiphertext.final()]);
