@@ -4,7 +4,7 @@ import stream from "node:stream"
 
 export function encrypt(algorithm, plaintext, keyLength, authTagLength) {
     const iv = crypto.randomBytes(12);
-    crypto.generateKey(algorithm,{ length:keyLength },(err,key) => {
+    crypto.generateKey("aes",{ length:keyLength },(err,key) => {
         if (err) throw err;
         var cipher = crypto.createCipheriv(algorithm,key,iv,{authTagLength:authTagLength});
         const ciphertext = cipher.update(plaintext, "utf-8", "hex") + cipher.final("hex"),
